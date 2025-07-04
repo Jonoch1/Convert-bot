@@ -11,7 +11,7 @@ from fastapi import FastAPI
 import uvicorn
 
 # ======= Konfigurasi =======
-TOKEN = os.getenv("7729313451:AAG3yPmECaxVD6EVyipmtjQxfufPUjl_BQY")
+TOKEN = os.getenv("BOT_TOKEN")
 RTMP_BASE_URL = "rtmp://jk1.pull.flve.cc/dream/"
 
 # ======= Install FFmpeg (Render Free container) =======
