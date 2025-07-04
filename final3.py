@@ -1,12 +1,31 @@
+import os
 import re
 import subprocess
+import threading
+
 import telegram
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, BotCommand
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, CallbackQueryHandler, ContextTypes, filters
 
+from fastapi import FastAPI
+import uvicorn
+
 # ======= Konfigurasi =======
-TOKEN = "7729313451:AAG3yPmECaxVD6EVyipmtjQxfufPUjl_BQY"
+TOKEN = os.getenv("7729313451:AAG3yPmECaxVD6EVyipmtjQxfufPUjl_BQY")
 RTMP_BASE_URL = "rtmp://jk1.pull.flve.cc/dream/"
+
+# ======= Install FFmpeg (Render Free container) =======
+os.system("apt-get update && apt-get install -y ffmpeg")
+
+# ======= FastAPI Endpoint untuk ping /healthz =======
+api = FastAPI()
+
+@api.get("/healthz")
+def health_check():
+    return {"status": "ok"}
+
+def run_fastapi():
+    uvicorn.run(api, host="0.0.0.0", port=10000)
 
 # ======= Utilitas =======
 def escape_markdown_v2(text: str) -> str:
@@ -112,8 +131,10 @@ async def set_commands(application):
 
 # ======= Main =======
 def main():
-    app = ApplicationBuilder().token(TOKEN).build()
+    # Jalankan FastAPI background
+    threading.Thread(target=run_fastapi).start()
 
+    app = ApplicationBuilder().token(TOKEN).build()
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CallbackQueryHandler(button_callback))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
